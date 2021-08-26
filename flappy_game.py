@@ -1,12 +1,16 @@
 import pygame
-
-pygame.font.init()
+import os
+import random
 
 WIN_WIDTH = 570
 WIN_HEIGHT = 800
+pygame.font.init()
+
+
 
 STAT_FONT = pygame.font.SysFont("comicsans", 50)
-
+HEADING_FONT = pygame.font.SysFont("comicsans", 100)
+TEXT_FONT = pygame.font.SysFont("comicsans", 30)
 
 path = "imgs/" #path = "c:\GoogleDrive\Scarlett\pygame\flappy_bird\imgs"
 BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join(path, "bird1.png"))),
@@ -26,7 +30,7 @@ class Bird:
     ROT_VEL = 20
     ANIMATION_TIME = 5
 
-    def __init__(self, x, y, weights):
+    def __init__(self, x, y, weights=None):
         self.x = x
         self.y = y
         self.tilt = 0
@@ -173,6 +177,34 @@ class Base:
         win.blit(self.IMG, (self.x1, self.y))
         win.blit(self.IMG, (self.x2, self.y))
 
+def draw_main_menu(win, bird):
+    win.blit(BG_IMG, (0,0)) # draw background on top left position
+    bird.draw(win)
+    text = HEADING_FONT.render("Menu", 1, (255, 255, 255))
+    win.blit(text, (50, 100))
+
+    text = TEXT_FONT.render("Start normal game - Press SPACE", 1, (255, 255, 255))
+    win.blit(text, (30, 250))
+
+    text = TEXT_FONT.render("Start training AI - Press T", 1, (255, 255, 255))
+    win.blit(text, (30, 300))
+
+    text = TEXT_FONT.render("Quit Flappy birds - Press Q", 1, (255, 255, 255))
+    win.blit(text, (30, 350))
+
+    pygame.display.update()
+
+
+def draw_normal_game(win, bird, pipes, base, score):
+    win.blit(BG_IMG, (0,0)) # draw background on top left position
+    bird.draw(win)
+    base.draw(win)
+    for pipe in pipes:
+        pipe.draw(win)
+
+    text = STAT_FONT.render("Score: " + str(score), 1, (255, 255, 255))
+    win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 50))
+    pygame.display.update()
 
 
 def draw_window(win, birds, pipes, base, score, epoch):

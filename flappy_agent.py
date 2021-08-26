@@ -1,4 +1,5 @@
 import numpy as np
+from flappy_game import Bird
 
 class Swarm:
 
