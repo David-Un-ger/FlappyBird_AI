@@ -8,7 +8,7 @@ import os
 import random
 import numpy as np
 
-from flappy_game import Bird, Base, Pipe, WIN_WIDTH, WIN_HEIGHT, draw_main_menu, draw_normal_game
+from flappy_game import Bird, Base, Pipe, WIN_WIDTH, WIN_HEIGHT, draw_main_menu, draw_normal_game, draw_ai_game
 from flappy_agent import Swarm
 
 NUM_BIRDS = 30
@@ -53,6 +53,61 @@ def play_normal_game(win, clock):
         draw_normal_game(win, bird, pipes, base, score)
     return score
 
+
+def play_ai_game(win, clock, speed="normal"):
+
+    training = True
+    epoch = 0
+    while training:
+        swarm = Swarm(NUM_BIRDS)
+        base = Base(730)
+        pipes = [Pipe(460), Pipe(700)]
+        score = 0
+        playing = True
+        while playing:
+            clock.tick(30)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+
+            for bird in swarm.birds:
+                bird.move()
+
+                for pipe in pipes:
+                    if pipe.collide(bird):
+                        print("Pipe hit. Score: ", score)
+                        playing = False
+                        break
+                    if bird.x > pipe.x:
+                        if pipe.passed == False:
+                            score += 1
+                            pipes.append(Pipe(700))
+                            pipe.passed = True
+                    pipe.move()
+                    if pipe.x + pipe.PIPE_TOP.get_width() < 0:
+                        # pipe at the left - can be removed
+                        pipes.remove(pipe)
+
+                if bird.y + bird.img.get_height() > 730:
+                    print("Floor hit. Score: ", score)
+                    playing = False
+            base.move()
+
+            draw_ai_game(win, swarm.birds, pipes, base, score, epoch)
+
+        # for epoch in range(50):
+        # update environment: pipes, bottom,
+
+        # swarm.move #
+        # end loop
+
+        # swarm.update
+
+        ####
+        # end
+    return swarm.best_score
+
+
 def main():
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
@@ -73,27 +128,17 @@ def main():
                     play_normal_game(win, clock)
                     # pygame.time.delay(1000)
 
-            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
                     print("Start AI session")
-                    swarm = Swarm(NUM_BIRDS)
-                    # for epoch in range(50):
-                    # update environment: pipes, bottom,
+                    play_ai_game(win, clock)
 
-                    # swarm.move #
-                    # end loop
+                if event.key == pygame.K_f:
+                    print("Start AI session in full speed")
+                    play_ai_game(win, clock, speed="full")
 
-                    # swarm.update
-
-                    ####
-                    # end
-                    run = False
-            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     print("Quit game")
                     run = False
-
-
 
     pygame.quit()
 

@@ -9,7 +9,7 @@ pygame.font.init()
 
 
 STAT_FONT = pygame.font.SysFont("comicsans", 50)
-HEADING_FONT = pygame.font.SysFont("comicsans", 100)
+HEADING_FONT = pygame.font.SysFont("comicsans", 70)
 TEXT_FONT = pygame.font.SysFont("comicsans", 30)
 
 path = "imgs/" #path = "c:\GoogleDrive\Scarlett\pygame\flappy_bird\imgs"
@@ -180,8 +180,8 @@ class Base:
 def draw_main_menu(win, bird):
     win.blit(BG_IMG, (0,0)) # draw background on top left position
     bird.draw(win)
-    text = HEADING_FONT.render("Menu", 1, (255, 255, 255))
-    win.blit(text, (50, 100))
+    text = HEADING_FONT.render("Flappy Bird", 1, (255, 255, 255))
+    win.blit(text, (120, 100))
 
     text = TEXT_FONT.render("Start normal game - Press SPACE", 1, (255, 255, 255))
     win.blit(text, (30, 250))
@@ -207,7 +207,7 @@ def draw_normal_game(win, bird, pipes, base, score):
     pygame.display.update()
 
 
-def draw_window(win, birds, pipes, base, score, epoch):
+def draw_ai_game(win, birds, pipes, base, score, epoch):
     win.blit(BG_IMG, (0,0)) # draw background on top left position
     for bird in birds:
         if bird.alive:
