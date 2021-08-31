@@ -6,13 +6,11 @@ WIN_WIDTH = 570
 WIN_HEIGHT = 800
 pygame.font.init()
 
-
-
 STAT_FONT = pygame.font.SysFont("comicsans", 50)
 HEADING_FONT = pygame.font.SysFont("comicsans", 70)
 TEXT_FONT = pygame.font.SysFont("comicsans", 30)
 
-path = "imgs/" #path = "c:\GoogleDrive\Scarlett\pygame\flappy_bird\imgs"
+path = "imgs/"
 BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join(path, "bird1.png"))),
              pygame.transform.scale2x(pygame.image.load(os.path.join(path, "bird2.png"))),
              pygame.transform.scale2x(pygame.image.load(os.path.join(path, "bird3.png")))]
@@ -22,6 +20,89 @@ BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join(path, "base.p
 BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join(path, "bg.png")))
 
 
+def draw_main_menu(win, bird):
+    win.blit(BG_IMG, (0,0)) # draw background on top left position
+    bird.draw(win)
+    text = HEADING_FONT.render("Flappy Bird", 1, (255, 255, 255))
+    win.blit(text, (120, 100))
+
+    text = TEXT_FONT.render("Start normal game - Press SPACE", 1, (255, 255, 255))
+    win.blit(text, (30, 250))
+
+    text = TEXT_FONT.render("Start training AI - Press T", 1, (255, 255, 255))
+    win.blit(text, (30, 300))
+
+    text = TEXT_FONT.render("Quit Flappy birds - Press Q", 1, (255, 255, 255))
+    win.blit(text, (30, 350))
+
+    pygame.display.update()
+
+
+class Game:
+    def __init__(self, pipe_x=(500, 750), base_x=770):
+        self.pipes = [Pipe(pipe_x[0]), Pipe(pipe_x[1])]
+        self.closest_pipe = self.pipes[0]
+        self.base = Base(770)
+        self.score = 0
+        self.highscore = 0
+
+    def move_pipes(self):
+        for i, pipe in enumerate(self.pipes):
+            pipe.move()
+            # pipe at the left - can be removed
+            if pipe.x + pipe.PIPE_TOP.get_width() < 0:
+                self.pipes.remove(pipe)
+
+            # pipe passed 250 - we need to add a new one
+            if pipe.x < 250 and not pipe.passed:  # pipe passed is required that we only append one new pipe
+                pipe.passed = True
+                self.pipes.append(Pipe(750))
+                self.score += 1
+                self.closest_pipe = self.pipes[i+1]
+
+    def move_base(self):
+        self.base.move()
+
+    def check_collision(self, bird):
+        for pipe in self.pipes:
+            if pipe.collide(bird):
+                #print("Pipe hit. Score: ", self.score)
+                bird.alive = False
+
+        if bird.y + bird.img.get_height() > 770:
+            # print("Floor hit. Score: ", score)
+            bird.alive = False
+
+    def draw_normal_game(self, win, bird):
+        win.blit(BG_IMG, (0,0)) # draw background on top left position
+        bird.draw(win)
+        self.base.draw(win)
+        for pipe in self.pipes:
+            pipe.draw(win)
+
+        text = STAT_FONT.render("Score: " + str(self.score), 1, (255, 255, 255))
+        win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 50))
+        pygame.display.update()
+
+    def draw_ai_game(self, win, swarm):
+        win.blit(BG_IMG, (0,0)) # draw background on top left position
+        for bird in swarm.birds:
+            if bird.alive:
+                bird.draw(win)
+        self.base.draw(win)
+        for pipe in self.pipes:
+            pipe.draw(win)
+
+        text = STAT_FONT.render("Epoch: " + str(swarm.epoch), 1, (255, 255, 255))
+        win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 10))
+
+        text = STAT_FONT.render("Score: " + str(self.score) + "/" + str(self.highscore), 1, (255, 255, 255))
+        win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 50))
+
+        text = STAT_FONT.render("Birds alive: " + str(swarm.alive), 1, (255, 255, 255))
+        win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 90))
+
+        pygame.display.update()
 
 
 class Bird:
@@ -101,6 +182,7 @@ class Bird:
         return pygame.mask.from_surface(self.img)
 
 
+
 class Pipe:
     GAP = 300
     VEL = 5
@@ -172,52 +254,5 @@ class Base:
         win.blit(self.IMG, (self.x1, self.y))
         win.blit(self.IMG, (self.x2, self.y))
 
-def draw_main_menu(win, bird):
-    win.blit(BG_IMG, (0,0)) # draw background on top left position
-    bird.draw(win)
-    text = HEADING_FONT.render("Flappy Bird", 1, (255, 255, 255))
-    win.blit(text, (120, 100))
-
-    text = TEXT_FONT.render("Start normal game - Press SPACE", 1, (255, 255, 255))
-    win.blit(text, (30, 250))
-
-    text = TEXT_FONT.render("Start training AI - Press T", 1, (255, 255, 255))
-    win.blit(text, (30, 300))
-
-    text = TEXT_FONT.render("Quit Flappy birds - Press Q", 1, (255, 255, 255))
-    win.blit(text, (30, 350))
-
-    pygame.display.update()
 
 
-def draw_normal_game(win, bird, pipes, base, score):
-    win.blit(BG_IMG, (0,0)) # draw background on top left position
-    bird.draw(win)
-    base.draw(win)
-    for pipe in pipes:
-        pipe.draw(win)
-
-    text = STAT_FONT.render("Score: " + str(score), 1, (255, 255, 255))
-    win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 50))
-    pygame.display.update()
-
-
-def draw_ai_game(win, swarm, pipes, base):
-    win.blit(BG_IMG, (0,0)) # draw background on top left position
-    for bird in swarm.birds:
-        if bird.alive:
-            bird.draw(win)
-    base.draw(win)
-    for pipe in pipes:
-        pipe.draw(win)
-
-    text = STAT_FONT.render("Epoch: " + str(swarm.epoch), 1, (255, 255, 255))
-    win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 10))
-
-    text = STAT_FONT.render("Score: " + str(swarm.current_score) + "/" + str(swarm.best_score), 1, (255, 255, 255))
-    win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 50))
-
-    text = STAT_FONT.render("Birds alive: " + str(swarm.alive), 1, (255, 255, 255))
-    win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 90))
-
-    pygame.display.update()

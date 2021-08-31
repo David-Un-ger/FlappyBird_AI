@@ -37,14 +37,9 @@ class Swarm:
             self.birds.append(bird)
         self.alive = num_birds
 
-
-    def move(self, pipes):
+    def move(self, closest_pipe):
         # move all birds in the swarm and check which birds need to jump
-        closest_pipe = 0
-        for pipe in pipes:
-            if not pipe.passed:
-                closest_pipe = pipe
-                break
+
         for bird in self.birds:
             bird.move()
             feature = [closest_pipe.x/100 -2 , closest_pipe.bottom/100 - 2, bird.height/100 - 2, 1] #**2, 1]
@@ -53,7 +48,7 @@ class Swarm:
                 bird.jump()
 
 
-    def move_pipes_check_collision(self, pipes):
+    def check_collision(self, pipes):
         # check for collision
         self.alive = 0
         for bird in self.birds:
@@ -62,20 +57,9 @@ class Swarm:
                     if pipe.collide(bird):
                         bird.alive = False
                         break
-                    if bird.x > pipe.x:
-                        if pipe.passed == False:
-                            self.current_score += 1
-                            self.weights_best_current = bird.weights
-                            pipes.append(Pipe(700))
-                            pipe.passed = True
-                    pipe.move()
-                    if pipe.x + pipe.PIPE_TOP.get_width() < 0:
-                        # pipe at the left - can be removed
-                        pipes.remove(pipe)
 
                 if bird.y + bird.img.get_height() > 730:
                     bird.alive = False
-
                 if bird.alive:  # if bird is still alive
                     self.alive += 1
 
@@ -83,3 +67,5 @@ class Swarm:
         if self.current_score > self.best_score:
             self.best_score = self.current_score
             self.weights_best_alltime = self.weights_best_current
+
+
