@@ -13,8 +13,8 @@ from flappy_agent import Swarm
 
 NUM_BIRDS = 30
 
-def play_normal_game(win, clock):
 
+def play_normal_game(win, clock):
     bird = Bird(230, 350)
     base = Base(730)
     pipes = [Pipe(460), Pipe(700)]
@@ -55,56 +55,41 @@ def play_normal_game(win, clock):
 
 
 def play_ai_game(win, clock, speed="normal"):
-
     training = True
-    epoch = 0
+    swarm = Swarm()
+
+    swarm.epoch = 0
+
     while training:
-        swarm = Swarm(NUM_BIRDS)
+
+        # initialize epoch
+        swarm.epoch += 1
+        swarm.breed(NUM_BIRDS)  # add birds to the swarm
+        swarm.current_score = 0
         base = Base(730)
         pipes = [Pipe(460), Pipe(700)]
-        score = 0
-        playing = True
-        while playing:
+
+        while swarm.alive:  # alive returns the number of living birds
             clock.tick(30)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    training = False
                     run = False
 
-            for bird in swarm.birds:
-                bird.move()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        print("end training")
+                        training = False
 
-                for pipe in pipes:
-                    if pipe.collide(bird):
-                        print("Pipe hit. Score: ", score)
-                        playing = False
-                        break
-                    if bird.x > pipe.x:
-                        if pipe.passed == False:
-                            score += 1
-                            pipes.append(Pipe(700))
-                            pipe.passed = True
-                    pipe.move()
-                    if pipe.x + pipe.PIPE_TOP.get_width() < 0:
-                        # pipe at the left - can be removed
-                        pipes.remove(pipe)
-
-                if bird.y + bird.img.get_height() > 730:
-                    print("Floor hit. Score: ", score)
-                    playing = False
+            swarm.move(pipes)
             base.move()
+            swarm.move_pipes_check_collision(pipes)
+            draw_ai_game(win, swarm, pipes, base)
 
-            draw_ai_game(win, swarm.birds, pipes, base, score, epoch)
+        print("all birds died", swarm.current_score)
+        print(swarm.weights_best_current)
 
-        # for epoch in range(50):
-        # update environment: pipes, bottom,
-
-        # swarm.move #
-        # end loop
-
-        # swarm.update
-
-        ####
-        # end
     return swarm.best_score
 
 
@@ -141,5 +126,6 @@ def main():
                     run = False
 
     pygame.quit()
+
 
 main()

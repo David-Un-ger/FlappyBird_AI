@@ -71,11 +71,6 @@ class Bird:
             if self.tilt > -90:
                 self.tilt -= self.ROT_VEL
 
-    def feature(self, pipe_x, pipe_bottom):
-        pipe_y_relative = (pipe_bottom - self.height) / 100
-
-        return [pipe_x/100, pipe_y_relative, pipe_y_relative**2, 1]
-
 
     def draw(self, win):
         self.img_count += 1
@@ -207,22 +202,22 @@ def draw_normal_game(win, bird, pipes, base, score):
     pygame.display.update()
 
 
-def draw_ai_game(win, birds, pipes, base, score, epoch):
+def draw_ai_game(win, swarm, pipes, base):
     win.blit(BG_IMG, (0,0)) # draw background on top left position
-    for bird in birds:
+    for bird in swarm.birds:
         if bird.alive:
             bird.draw(win)
     base.draw(win)
     for pipe in pipes:
         pipe.draw(win)
 
-    text = STAT_FONT.render("Epoch: " + str(epoch), 1, (255, 255, 255))
+    text = STAT_FONT.render("Epoch: " + str(swarm.epoch), 1, (255, 255, 255))
     win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 10))
 
-    text = STAT_FONT.render("Score: " + str(score), 1, (255, 255, 255))
+    text = STAT_FONT.render("Score: " + str(swarm.current_score) + "/" + str(swarm.best_score), 1, (255, 255, 255))
     win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 50))
 
-    text = STAT_FONT.render("Birds alive: " + str(len(birds)), 1, (255, 255, 255))
+    text = STAT_FONT.render("Birds alive: " + str(swarm.alive), 1, (255, 255, 255))
     win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 90))
 
     pygame.display.update()
