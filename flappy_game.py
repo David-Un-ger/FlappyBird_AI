@@ -39,7 +39,7 @@ def draw_main_menu(win, bird):
 
 
 class Game:
-    def __init__(self, pipe_x=(500, 750), base_x=770):
+    def __init__(self, pipe_x=(450, 750), base_x=770):
         self.pipes = [Pipe(pipe_x[0]), Pipe(pipe_x[1])]
         self.closest_pipe = self.pipes[0]
         self.base = Base(770)
@@ -53,11 +53,13 @@ class Game:
             if pipe.x + pipe.PIPE_TOP.get_width() < 0:
                 self.pipes.remove(pipe)
 
-            # pipe passed 250 - we need to add a new one
-            if pipe.x < 250 and not pipe.passed:  # pipe passed is required that we only append one new pipe
+            # pipe passed 150 - we need to add a new one
+            if pipe.x < 150 and not pipe.passed:  # pipe passed is required that we only append one new pipe
                 pipe.passed = True
                 self.pipes.append(Pipe(750))
                 self.score += 1
+                if self.score > self.highscore:
+                    self.highscore = self.score
                 self.closest_pipe = self.pipes[i+1]
 
     def move_base(self):
@@ -96,7 +98,7 @@ class Game:
         text = STAT_FONT.render("Epoch: " + str(swarm.epoch), 1, (255, 255, 255))
         win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 10))
 
-        text = STAT_FONT.render("Score: " + str(self.score) + "/" + str(self.highscore), 1, (255, 255, 255))
+        text = STAT_FONT.render("Score: " + str(self.score) + "/" + str(swarm.highscore), 1, (255, 255, 255))
         win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 50))
 
         text = STAT_FONT.render("Birds alive: " + str(swarm.alive), 1, (255, 255, 255))

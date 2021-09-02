@@ -1,14 +1,9 @@
-# Tech with Tim
+# Basic game from "Tech with Tim"
 # https://www.youtube.com/watch?v=MMxFDaIOHsE&list=PLzMcBGfZo4-lwGZWXz5Qgta_YNX3_vLS2&ab_channel=TechWithTim
 
 import pygame
-import neat
-import time
-import os
-import random
-import numpy as np
 
-from flappy_game import Game, Bird, Base, Pipe, WIN_WIDTH, WIN_HEIGHT, draw_main_menu
+from flappy_game import Game, Bird, WIN_WIDTH, WIN_HEIGHT, draw_main_menu
 from flappy_agent import Swarm
 
 NUM_BIRDS = 30
@@ -22,7 +17,7 @@ def play_normal_game(win, clock):
         clock.tick(30)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                break
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     bird.jump()
@@ -31,6 +26,9 @@ def play_normal_game(win, clock):
         game.move_base()
         game.check_collision(bird)
         game.draw_normal_game(win, bird)
+        # visualize feature in normal mode
+        # pygame.draw.line(win, (255,0,0), (250, bird.y), (250,game.closest_pipe.bottom), width=3)
+        # pygame.display.update()
 
 
 def play_ai_game(win, clock, speed="normal"):
@@ -43,27 +41,36 @@ def play_ai_game(win, clock, speed="normal"):
         swarm.epoch += 1
         swarm.breed(NUM_BIRDS)  # add birds to the swarm
         swarm.current_score = 0
-
+        print("New epoch")
         while swarm.alive:  # alive returns the number of living birds
-            clock.tick(30)
+            if speed == "normal":
+                clock.tick(30)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    run = False
+                    training = False
+                    break
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         training = False
+                        break
 
             game.move_pipes()
             game.move_base()
             swarm.move(game.closest_pipe)
             swarm.alive = 0
             for bird in swarm.birds:
-                game.check_collision(bird)
-                swarm.alive += bird.alive
+                if bird.alive:
+                    swarm.weights_current = bird.weights  # store the weights of the last living bird
+                    game.check_collision(bird)
+                    swarm.alive += 1
+
             game.draw_ai_game(win, swarm)
 
-        print("all birds died", swarm.current_score)
-        print(swarm.weights_best_current)
+            if game.score > swarm.highscore:
+                swarm.weights_highscore = swarm.weights_current
+                swarm.highscore = game.score
+
+        print(swarm.weights_current)
 
 
 def main():
