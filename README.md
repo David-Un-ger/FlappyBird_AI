@@ -7,3 +7,4 @@ based on the Youtube tutorial from Tech With Tim - thanks Tim!
 Several updates:
 - Added a main menu to decide between play the game yourself or let the AI play
 - Added a new code structure in several files
+![image](https://user-images.githubusercontent.com/35065831/132067195-32992d4c-baa6-4b65-ae1a-650adf6eb541.png)
