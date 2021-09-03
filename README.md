@@ -1,3 +1,4 @@
+![flappy (1)](https://user-images.githubusercontent.com/35065831/132073448-1a443c31-7f55-4751-9d0d-237cde674f44.gif)
 # FlappyBird_AI
 
 based on the Youtube tutorial from Tech With Tim - thanks Tim!
